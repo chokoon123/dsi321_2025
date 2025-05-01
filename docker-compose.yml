@@ -10,9 +10,3 @@ services:
       LAKEFS_DATABASE_TYPE: "local"
       LAKEFS_AUTH_ENCRYPT_SECRET_KEY: "wait"
       LAKEFS_BLOCKSTORE_TYPE: "local"
-  jupyter:
-    container_name: jupyter
-    image: jupyter/minimal-notebook:latest
-    ports:
-      - 8888:8888
-    command: start-notebook.sh --NotebookApp.token=''
