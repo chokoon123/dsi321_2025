@@ -10,3 +10,14 @@ services:
       LAKEFS_DATABASE_TYPE: "local"
       LAKEFS_AUTH_ENCRYPT_SECRET_KEY: "wait"
       LAKEFS_BLOCKSTORE_TYPE: "local"
+  
+  jupyter:
+    image: jupyter/pyspark-notebook:latest
+    ports:
+      - 8888:8888
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=
+    volumes:
+      - ./work:/home/jovyan/work
+    command: start-notebook.sh --NotebookApp.token='' --NotebookApp.allow_root=True 
