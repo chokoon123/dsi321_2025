@@ -10,6 +10,9 @@ services:
       LAKEFS_DATABASE_TYPE: "local"
       LAKEFS_AUTH_ENCRYPT_SECRET_KEY: "wait"
       LAKEFS_BLOCKSTORE_TYPE: "local"
+    volumes:
+      - lakefs_data:/data # Persist LakeFS data
+      - lakefs_repos:/repositories # Persist repositories
 
   postgres:
     image: postgres:13-alpine
