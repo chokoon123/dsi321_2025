@@ -70,3 +70,5 @@ services:
 
 volumes:
   postgres_data:
+  lakefs_data:
+  lakefs_repos:
