@@ -13,5 +13,5 @@ if __name__ == "__main__":
         name="airquality_deployment",
         parameters={},
         work_pool_name="default-agent-pool",
-        cron="*/40 * * * *",  
+        cron="*/2 * * * *",  
     )
