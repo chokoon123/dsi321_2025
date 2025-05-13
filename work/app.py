@@ -38,7 +38,7 @@ def load_data():
     df_all['year'] = df_all['year'].astype(int) 
     df_all['month'] = df_all['month'].astype(int)
     df_all.drop_duplicates(inplace=True)
-    df_all['PM25.aqi'] = df_all['PM25.aqi'].mask(df_all['PM25.aqi'] < 0, pd.NA)
+    df_all['PM25.aqi'] = df_all['PM25.value'].mask(df_all['PM25.value'] < 0, pd.NA)
     # Fill value "Previous Record" Group By stationID
     df_all['PM25.aqi'] = df_all.groupby('stationID')['PM25.aqi'].transform(lambda x: x.fillna(method='ffill'))
     return df_all
@@ -67,6 +67,7 @@ st.set_page_config(
     layout = 'wide'
 )
 st.title("Air Quality Dashboard from LakeFS")
+
 df = load_data()
 thai_time = datetime.now(ZoneInfo("Asia/Bangkok"))
 st.caption(f"อัปเดตล่าสุด: {thai_time.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -144,7 +145,7 @@ with placeholder.container():
         # Scorecards
         kpi1, kpi2, kpi3 = st.columns(3)
         kpi1.metric(
-            label="🌡️ ค่าเฉลี่ยคุณภาพ PM2.5 ในอากาศ",
+            label="🌡️ ค่าเฉลี่ยคุณภาพอากาศ",
             value=f"{avg_aqi:.2f}",
             delta=f"{delta_aqi:+.2f}" if delta_aqi is not None else None
         )
@@ -245,3 +246,22 @@ with fig_col2:
         st.plotly_chart(fig)
     else:
         st.warning("ไม่พบข้อมูลสำหรับสถานีที่เลือก")
+
+
+st.markdown("---") 
+with st.container():
+    st.subheader("Insights from DataFrame")
+    if not df_selected.empty:
+        with st.expander("Key Statistics"):
+            st.write("### Descriptive Statistics")
+            st.write(df_selected.describe())
+
+            st.write("#### Overall AQI Trends")
+            overall_avg = df_selected['PM25.aqi'].mean()
+            overall_max = df_selected['PM25.aqi'].max()
+            overall_min = df_selected['PM25.aqi'].min()
+            st.write(f"- Average AQI: {overall_avg:.2f}")
+            st.write(f"- Maximum AQI: {overall_max:.2f}")
+            st.write(f"- Minimum AQI: {overall_min:.2f}")
+    else:
+        st.warning("No data available for analysis.")
