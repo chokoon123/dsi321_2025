@@ -26,9 +26,4 @@ The workflow uses **Python** as the main programming language, leverages **Prefe
 5. **Containerized with Docker Compose**  
    All services are containerized for consistent and reproducible deployment.
 
-## 📦 Getting Started
 
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/your-username/your-repo-name.git
-   cd your-repo-name

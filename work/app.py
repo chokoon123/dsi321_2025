@@ -285,10 +285,11 @@ with st.container():
             st.write(f"- Maximum AQI: {overall_max:.2f}")
             st.write(f"- Minimum AQI: {overall_min:.2f}")
 
-            for col in df_selected.select_dtypes(include=['object']).columns:
-                 df_selected[col] = df_selected[col].astype(str)
+            with st.expander("Datatype"):
+                for col in df_selected.select_dtypes(include=['object']).columns:
+                    df_selected[col] = df_selected[col].astype(str)
 
-            st.write(df_selected_top5.dtypes)
+                st.write(df_selected_top5.dtypes)
             
 
 
