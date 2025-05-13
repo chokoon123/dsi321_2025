@@ -60,3 +60,188 @@ def filter_data(df, start_date, end_date, station):
     df_filtered = df_filtered[df_filtered['PM25.aqi'] >= 0]
 
     return df_filtered
+
+st.set_page_config(
+    page_title = 'Real-Time Air Quality Dashboard',
+    # page_icon = '✅',
+    layout = 'wide'
+)
+st.title("Air Quality Dashboard from LakeFS")
+df = load_data()
+thai_time = datetime.now(ZoneInfo("Asia/Bangkok"))
+st.caption(f"อัปเดตล่าสุด: {thai_time.strftime('%Y-%m-%d %H:%M:%S')}")
+
+# Set up input widgets
+# st.logo(image="images/streamlit-logo-primary-colormark-lighttext.png", 
+#         icon_image="images/streamlit-mark-color.png")
+
+# Sidebar settings
+with st.sidebar:
+    st.title("Air4Thai Dashboard")
+    st.header("⚙️ Settings")
+
+    max_date = df['timestamp'].max().date()
+    min_date = df['timestamp'].min().date()
+    default_start_date = min_date
+    default_end_date = max_date
+
+    start_date = st.date_input(
+        "Start date",
+        default_start_date,
+        min_value=min_date,
+        max_value=max_date
+    )
+
+    end_date = st.date_input(
+        "End date",
+        default_end_date,
+        min_value=min_date,
+        max_value=max_date
+    )
+
+    station_name = df['nameTH'].dropna().unique().tolist()
+    station_name.sort()
+    station_name.insert(0, "ทั้งหมด")
+    station = st.selectbox("Select Station", station_name)
+
+df_filtered = filter_data(df, start_date, end_date, station)
+
+# Container for KPI and main content
+placeholder = st.empty()
+
+
+with placeholder.container():
+
+    if not df_filtered.empty:
+        # AVG for Selection Interval
+        avg_aqi = df_filtered['PM25.aqi'].mean()
+        avg_color = df_filtered['PM25.color_id'].mean()
+
+        # Previous Day
+        prev_day = end_date - pd.Timedelta(days=1)
+        df_prev_day = filter_data(df, prev_day, prev_day, station)
+
+        # AVG of Previous Day
+        prev_avg_aqi = df_prev_day['PM25.aqi'].mean()
+        prev_avg_color = df_prev_day['PM25.color_id'].mean()
+
+        # Delta
+        delta_aqi = None if pd.isna(prev_avg_aqi) else avg_aqi - prev_avg_aqi
+        delta_color = None if pd.isna(prev_avg_color) else avg_color - prev_avg_color
+
+        # Area that have the Most AQI
+        area_highest_aqi = df_filtered.groupby('areaTH')['PM25.aqi'].mean().idxmax()
+        area_highest_aqi_val = df_filtered.groupby('areaTH')['PM25.aqi'].mean().max()
+
+        # Area Most AQI of Previous
+        if not df_prev_day.empty:
+            # area_prev_highest_aqi = df_prev_day.groupby('areaTH')['PM25.aqi'].mean().idxmax()
+            area_prev_highest_aqi_val = df_prev_day.groupby('areaTH')['PM25.aqi'].mean().max()
+            delta_area_aqi = area_highest_aqi_val - area_prev_highest_aqi_val
+        else:
+            delta_area_aqi = None
+
+        # Scorecards
+        kpi1, kpi2, kpi3 = st.columns(3)
+        kpi1.metric(
+            label="🌡️ ค่าเฉลี่ยคุณภาพ PM2.5 ในอากาศ",
+            value=f"{avg_aqi:.2f}",
+            delta=f"{delta_aqi:+.2f}" if delta_aqi is not None else None
+        )
+        kpi2.metric(
+            label="🎨 ค่าเฉลี่ยระดับ PM2.5 ของประเทศไทย",
+            value=f"{avg_color:.2f}",
+            delta=f"{delta_color:+.2f}" if delta_color is not None else None
+        )
+        kpi3.metric(
+            label="📍 พื้นที่ที่มีระดับ PM2.5 สูงสุด",
+            value=area_highest_aqi,
+            delta=f"{delta_area_aqi:+.2f}" if delta_area_aqi is not None else None
+        )
+    else:
+        st.warning("ไม่พบข้อมูลในช่วงเวลาหรือสถานีที่เลือก")
+
+
+# Visualization section
+fig_col1, fig_col2 = st.columns([1.2, 1.8], gap='medium')
+
+# Filter by station
+if station == "ทั้งหมด":
+    df_selected = df_filtered.copy()
+    title = "PM2.5 AQI ของทุกสถานี"
+else:
+    df_selected = df_filtered[df_filtered['nameTH'] == station]
+    title = f"PM2.5 AQI - สถานี {station}"
+
+# Left column: Thailand map with AQI
+with fig_col1:
+    if not df_selected.empty:
+        df_map = df_selected.groupby(['stationID', 'nameTH', 'lat', 'long'], as_index=False)['PM25.aqi'].mean()
+
+        fig_map = px.scatter_geo(
+            df_map,
+            lat='lat',
+            lon='long',
+            color='PM25.aqi',
+            hover_name='nameTH',
+            color_continuous_scale='Turbo',
+            title='แผนที่สถานีตรวจวัด PM2.5 AQI ในประเทศไทย',
+            projection='natural earth'
+        )
+
+        fig_map.update_geos(
+            visible=True,
+            resolution=50,
+            showcountries=True,
+            countrycolor="grey",
+            showsubunits=True,
+            subunitcolor="lightgray",
+            showocean=True,
+            oceancolor="LightBlue",
+            showland=True,
+            landcolor="whitesmoke",
+            lakecolor="LightBlue",
+            showlakes=True,
+            lataxis_range=[5, 21],  # กำหนดขอบเขตละติจูด
+            lonaxis_range=[93, 110] # กำหนดขอบเขตลองจิจูด
+        )
+
+        fig_map.update_layout(
+            template="plotly_dark",
+            margin={"r":0,"t":40,"l":0,"b":0},
+            coloraxis_colorbar=dict(title="PM2.5 AQI")
+        )
+
+        st.plotly_chart(fig_map)
+    else:
+        st.warning("ไม่พบข้อมูลสำหรับสถานีที่เลือก")
+
+
+# Right column: Line chart
+with fig_col2:
+    if not df_selected.empty:
+        if station == "ทั้งหมด":
+            # Filter the top 5 stations with highest average AQI
+            top_5_stations = df_selected.groupby('nameTH')['PM25.aqi'].mean().nlargest(5).index
+            df_selected_top5 = df_selected[df_selected['nameTH'].isin(top_5_stations)]
+            
+            fig = px.line(
+                df_selected_top5.sort_values("timestamp"),
+                x='timestamp',
+                y='PM25.aqi',
+                color='nameTH',
+                title=f"Top 5 สถานี AQI สูงสุดในช่วง {start_date} ถึง {end_date}",
+            )
+        else:
+            fig = px.line(
+                df_selected.sort_values("timestamp"),
+                x='timestamp',
+                y='PM25.aqi',
+                color=None,
+                title=title,
+            )
+        
+        fig.update_layout(xaxis_title='Time', yaxis_title='PM2.5 AQI')
+        st.plotly_chart(fig)
+    else:
+        st.warning("ไม่พบข้อมูลสำหรับสถานีที่เลือก")
