@@ -9,6 +9,7 @@ import s3fs
 import time
 from zoneinfo import ZoneInfo
 from datetime import timedelta, datetime
+import pyarrow
 
 lakefs_endpoint = os.getenv("LAKEFS_ENDPOINT", "http://lakefs-dev:8000")
 ACCESS_KEY = os.getenv("LAKEFS_ACCESS_KEY")
@@ -32,16 +33,33 @@ if time.time() - st.session_state.last_load_time > 2400:
 def load_data():
     lakefs_path = "s3://air-quality/main/airquality.parquet/year=2025"
     data_list = fs.glob(f"{lakefs_path}/*/*/*/*")
-    df_all = pd.concat([pd.read_parquet(f"s3://{path}", filesystem=fs) for path in data_list], ignore_index=True)
-    df_all['lat'] = pd.to_numeric(df_all['lat'], errors='coerce')
-    df_all['long'] = pd.to_numeric(df_all['long'], errors='coerce')
-    df_all['year'] = df_all['year'].astype(int) 
-    df_all['month'] = df_all['month'].astype(int)
+
+    # Load files using pyarrow and parse with consistent dtypes
+    df_list = []
+    for path in data_list:
+        df = pd.read_parquet(f"s3://{path}", filesystem=fs, engine="pyarrow")
+
+        # Clean before concatenation
+        df['lat'] = pd.to_numeric(df.get('lat'), errors='coerce')
+        df['long'] = pd.to_numeric(df.get('long'), errors='coerce')
+        df['year'] = pd.to_numeric(df.get('year'), errors='coerce').astype('Int64')
+        df['month'] = pd.to_numeric(df.get('month'), errors='coerce').astype('Int64')
+        df['PM25.value'] = pd.to_numeric(df.get('PM25.value'), errors='coerce')
+
+        df_list.append(df)
+
+    df_all = pd.concat(df_list, ignore_index=True)
+
+    # Post-processing
     df_all.drop_duplicates(inplace=True)
     df_all['PM25.aqi'] = df_all['PM25.value'].mask(df_all['PM25.value'] < 0, pd.NA)
-    # Fill value "Previous Record" Group By stationID
-    df_all['PM25.aqi'] = df_all.groupby('stationID')['PM25.aqi'].transform(lambda x: x.fillna(method='ffill'))
+    df_all['PM25.aqi'] = df_all.groupby('stationID')['PM25.aqi'].transform(lambda x: x.ffill())
+    text_columns = ['stationID', 'nameTH', 'nameEN', 'areaTH', 'areaEN', 'stationType']
+    for col in text_columns:
+        df_all[col] = df_all[col].astype('string')
+
     return df_all
+
 
 def filter_data(df, start_date, end_date, station):
     df_filtered = df.copy()
@@ -66,7 +84,7 @@ st.set_page_config(
     # page_icon = '✅',
     layout = 'wide'
 )
-st.title("Air Quality Dashboard from LakeFS")
+st.title("Air Quality Dashboard")
 
 df = load_data()
 thai_time = datetime.now(ZoneInfo("Asia/Bangkok"))
@@ -253,8 +271,11 @@ with st.container():
     st.subheader("Insights from DataFrame")
     if not df_selected.empty:
         with st.expander("Key Statistics"):
-            st.write("### Descriptive Statistics")
-            st.write(df_selected.describe())
+            st.info('# Descriptive Statistics', icon="ℹ️")
+            df_selected1 = df_selected.copy()
+            df_selected1 = df_selected1[["lat","long","PM25.aqi"]]
+            # st.dataframe(df_selected1, use_container_width=True)
+            st.write(df_selected1.describe())
 
             st.write("#### Overall AQI Trends")
             overall_avg = df_selected['PM25.aqi'].mean()
@@ -263,5 +284,15 @@ with st.container():
             st.write(f"- Average AQI: {overall_avg:.2f}")
             st.write(f"- Maximum AQI: {overall_max:.2f}")
             st.write(f"- Minimum AQI: {overall_min:.2f}")
-    else:
-        st.warning("No data available for analysis.")
+
+            for col in df_selected.select_dtypes(include=['object']).columns:
+                 df_selected[col] = df_selected[col].astype(str)
+
+            st.write(df_selected_top5.dtypes)
+            
+
+
+# st.markdown("---") 
+# with st.container():
+#     st.subheader("")
+        
