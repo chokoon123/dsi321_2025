@@ -12,7 +12,7 @@ RUN apt-get update && \
     pip install --upgrade streamlit && \
     rm -rf /var/lib/apt/lists/*
 
-COPY visualization /app
+COPY work /app
 
 EXPOSE 8501
 
