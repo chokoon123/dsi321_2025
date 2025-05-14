@@ -30,13 +30,54 @@ The workflow uses **Python** as the main programming language, leverages **Prefe
 
 ## ▶️ How to Use
 Follow these steps to set up and run the full data pipeline and dashboard:
- **Clone the Repository**
-   ```bash
-   git clone https://github.com/your-username/your-repo-name.git
-   cd your-repo-name 
+```bash
+git clone https://github.com/chokoon123/dsi321_2025.git
+cd Real-time-Data-Processing-Pipeline
+```
 
 Visit: http://localhost:8888
 
+```bash
 python deploy.py 
+```
+
+## Data Schema
+The data schema is defined in SCHEMA.md. For this air quality data example:
+```json
+{
+  "columns": [
+    "timestamp", "stationID", "nameTH", "nameEN", "areaTH",
+    "areaEN", "stationType", "lat", "long", "PM25.color_id",
+    "PM25.aqi", "year", "month", "day", "hour"
+  ],
+  "types": [
+    "TEXT", "TEXT", "TEXT", "TEXT", "TEXT", "TEXT",
+    "TEXT", "REAL", "REAL", "INTEGER", "INTEGER",
+    "INTEGER", "INTEGER", "INTEGER", "INTEGER"
+  ],
+  "key_columns": [
+    "timestamp", "stationID", "lat", "long", "PM25.aqi"
+  ]
+}
+```
+* timestamp: ISO format timestamp of data collection.
+* stationID: Station ID code.
+* nameTH: Station name in Thai.
+* nameEN: Station name in English.
+* areaTH: Area name in Thai.
+* areaEN: Area name in English.
+* stationType: Type of the station (e.g., roadside, general area).
+* lat: Latitude of the station.
+* long: Longitude of the station.
+* PM25.color_id: Color ID for visualization based on PM2.5 level.
+* PM25.aqi: PM2.5 Air Quality Index (AQI).
+* year: Year of data record.
+* month: Month of data record.
+* day: Day of data record.
+* hour: Hour of data record.
+Key columns are used for data quality checks (no missing values).
+Adapt the schema for your data source as needed.
+
+
 
 
