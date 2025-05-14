@@ -14,18 +14,25 @@ The workflow uses **Python** as the main programming language, leverages **Prefe
 ## 🔁 Workflow
 
 1. **Scheduled API Fetching with Prefect**  
-   Prefect is used to schedule a function that pulls data from an API every hour.
+    Data is automatically fetched from an external API every hour using Prefect, which handles task scheduling and flow orchestration.
 
 2. **Data Storage with LakeFS**  
-   The fetched data is stored as Parquet files in LakeFS for version control and reproducibility.
+    The fetched data is saved in Parquet format and versioned using LakeFS, enabling reproducibility and easy tracking of changes over time.
 
 3. **Mounting Data Locally**  
-   The LakeFS repository is mounted locally to enable reading Parquet files directly.
+    LakeFS is mounted locally, allowing the system to access versioned data directly through the file system for downstream processing.
 
 4. **Visualization with Streamlit**  
-   A Python-based Streamlit app reads the Parquet data and displays interactive charts and insights.
+   A Python-based Streamlit app reads the Parquet data and displays interactive charts and insights with Basic metrics such as mean, count, and distribution are calculated using descriptive statisticsand  A Large Language Model (LLM) is then used to generate natural language summaries of key insights.
 
 5. **Containerized with Docker Compose**  
-   All services are containerized for consistent and reproducible deployment.
+    All services—including Prefect, LakeFS, and Streamlit—are containerized using Docker Compose for easy deployment and environment consistency.   
+
+## ▶️ How to Use
+Follow these steps to set up and run the full data pipeline and dashboard:
+<pre> ```bash git clone https://github.com/chokoon123/dsi321_2025.git cd Real-time-Data-Processing-Pipeline docker-compose up --build ``` </pre>
+
+Visit: http://localhost:8888
+<pre> ``` python deploy.py ``` </pre>
 
 

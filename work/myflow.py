@@ -27,8 +27,8 @@ def data_processing(data: list[dict]) -> pd.DataFrame:
     numeric_cols = ['PM25.color_id', 'PM25.value']
 
     df[numeric_cols] = df[numeric_cols].astype(float)
-    df['time'] = df['time'].mode()[0]
-    df['date'] = df['date'].mode()[0]
+    df['time'] = df[df['date'] == df['date'].max()]['time'].max()
+    df['date'] = df['date'].max()
     df['timestamp'] = pd.to_datetime(df['date'] + ' ' + df['time'])
 
     df['year'] = df['timestamp'].dt.year
@@ -48,8 +48,8 @@ def load_to_lakefs(df: pd.DataFrame, lakefs_s3_path: str, storage_options: dict)
         lakefs_s3_path,
         storage_options=storage_options,
         partition_cols=['year','month','day','hour'],
+        engine="pyarrow"
     )
-
 
 
 @flow(name='main-flow', log_prints=True)

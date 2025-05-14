@@ -58,10 +58,10 @@ def load_data():
     df_all.drop_duplicates(inplace=True)
     df_all['PM25.aqi'] = df_all['PM25.value'].mask(df_all['PM25.value'] < 0, pd.NA)
     df_all['PM25.aqi'] = df_all.groupby('stationID')['PM25.aqi'].transform(lambda x: x.ffill())
+    
     text_columns = ['stationID', 'nameTH', 'nameEN', 'areaTH', 'areaEN', 'stationType']
     for col in text_columns:
         df_all[col] = df_all[col].astype('string')
-
     return df_all
 
 
