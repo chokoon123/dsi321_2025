@@ -2,6 +2,8 @@
 
 📊 **A real-time data pipeline with visualization using Prefect, LakeFS, and Streamlit – all containerized with Docker Compose**
 
+This project was developed as part of the DSI321: Big Data Infrastructure course, focusing on building automated data pipelines for real-time analytics. It uses Prefect.io to manage task orchestration, and the entire system runs in Docker containers. Data insights are visualized using Python-based tools, making it easy to monitor and analyze the incoming data stream.
+
 ## 🔍 Overview
 
 This project is a hands-on implementation of a real-time data pipeline. It fetches data from an external API on an hourly basis, stores it in a versioned data lake, and visualizes insights through an interactive web dashboard.
