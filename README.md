@@ -75,6 +75,8 @@ The data schema is defined in SCHEMA.md. For this air quality data example:
 * month: Month of data record.
 * day: Day of data record.
 * hour: Hour of data record.
+
+
 Key columns are used for data quality checks (no missing values).
 Adapt the schema for your data source as needed.
 
