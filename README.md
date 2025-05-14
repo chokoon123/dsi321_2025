@@ -34,9 +34,9 @@ Follow these steps to set up and run the full data pipeline and dashboard:
    ```bash
    git clone https://github.com/your-username/your-repo-name.git
    cd your-repo-name 
-   ```bash
 
 Visit: http://localhost:8888
-<pre> python deploy.py </pre>
+
+python deploy.py 
 
 
