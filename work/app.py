@@ -290,8 +290,7 @@ with st.container():
 
             with st.expander("Data Types", expanded=True):
                 st.write(df_selected_top5.dtypes)   
-            
-
+        
 
 st.markdown("---") 
 with st.container():

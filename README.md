@@ -6,7 +6,7 @@ This project was developed as part of the DSI321: Big Data Infrastructure course
 
 ## 🔍 Overview
 
-This project is a hands-on implementation of a real-time data pipeline. It fetches data from an external API on an hourly basis, stores it in a versioned data lake, and visualizes insights through an interactive web dashboard.
+This project is a hands-on implementation of a real-time data pipeline. It fetches data from an Air4Thai API on an hourly basis, stores it in a versioned data lake , and visualizes insights through an interactive web dashboard.
 
 The workflow uses **Python** as the main programming language, leverages **Prefect** for scheduling, **LakeFS** for data versioning, and **Streamlit** for front-end visualization. Everything runs seamlessly via **Docker Compose**.
 
