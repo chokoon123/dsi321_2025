@@ -30,9 +30,10 @@ The workflow uses **Python** as the main programming language, leverages **Prefe
 
 ## ▶️ How to Use
 Follow these steps to set up and run the full data pipeline and dashboard:
-<pre> ``` git clone https://github.com/chokoon123/dsi321_2025.git ``` </pre> 
-<pre> ``` cd Real-time-Data-Processing-Pipeline ``` </pre> 
-<pre> ``` docker-compose up --build ``` </pre>
+ **Clone the Repository**
+   ```bash
+   git clone https://github.com/your-username/your-repo-name.git
+   cd your-repo-name
 
 Visit: http://localhost:8888
 <pre> python deploy.py </pre>
