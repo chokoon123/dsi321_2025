@@ -51,8 +51,6 @@ def load_to_lakefs(df: pd.DataFrame, lakefs_s3_path: str, storage_options: dict)
         engine='pyarrow'
     )
 
-
-
 @flow(name='main-flow', log_prints=True)
 def main_flow():
 
