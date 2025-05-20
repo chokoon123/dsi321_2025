@@ -36,10 +36,14 @@ cd Real-time-Data-Processing-Pipeline
 ```
 
 Visit: http://localhost:8888
+Before executing deploy.py, you must first create a repository named air-quality-data in LakeFS.
+
+Deploy Prefect Flow: Deploy the pipeline with a start of the hour (minute 40).:
 
 ```bash
 python deploy.py 
 ```
+This sets up a deployment named data-pipeline in the default-agent-pool work pool, scheduled to run at the 40th minute of every hour (cron="40 * * * *").
 
 ## Data Schema
 The data schema is defined in SCHEMA.md. For this air quality data example:
@@ -51,12 +55,14 @@ The data schema is defined in SCHEMA.md. For this air quality data example:
     "PM25.aqi", "year", "month", "day", "hour"
   ],
   "types": [
-    "TEXT", "TEXT", "TEXT", "TEXT", "TEXT", "TEXT",
-    "TEXT", "REAL", "REAL", "INTEGER", "INTEGER",
-    "INTEGER", "INTEGER", "INTEGER", "INTEGER"
-  ],
+    "datetime64[ns]", "string", "string", "string", "string", 
+    "string", "string", "float64", "float64", "int64",  
+    "float64", "int64", "int64", "int32", "int32"
+    ],
   "key_columns": [
-    "timestamp", "stationID", "lat", "long", "PM25.aqi"
+    "timestamp", "stationID", "nameTH", "nameEN", "areaTH",
+    "areaEN", "stationType", "lat", "long", "PM25.color_id",
+    "year", "month", "day", "hour"
   ]
 }
 ```
